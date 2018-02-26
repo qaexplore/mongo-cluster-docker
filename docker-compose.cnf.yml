@@ -2,26 +2,32 @@ version: '2'
 services:
     mongo-cnf-2:
         container_name: "mongo-cnf-2"
-        image: mongo
+        image: mongo:3.4
+        volumes:
+            - ./data/mongo-cnf-2:/data/db
         ports:
             - "30002:27017"
-        command: mongod --replSet cnf-serv --rest --configsvr --port 27017 --oplogSize 16 --noprealloc --smallfiles
+        command: mongod --replSet cnf-serv --dbpath /data/db --configsvr --port 27017 --oplogSize 16 --noprealloc --smallfiles
         restart: always
 
     mongo-cnf-3:
         container_name: "mongo-cnf-3"
-        image: mongo
+        image: mongo:3.4
+        volumes:
+            - ./data/mongo-cnf-3:/data/db
         ports:
             - "30003:27017"
-        command: mongod --replSet cnf-serv --rest --configsvr --port 27017 --oplogSize 16 --noprealloc --smallfiles
+        command: mongod --replSet cnf-serv --dbpath /data/db --configsvr --port 27017 --oplogSize 16 --noprealloc --smallfiles
         restart: always 
 
     mongo-cnf-1:
         container_name: "mongo-cnf-1"
-        image: mongo
+        image: mongo:3.4
+        volumes:
+            - ./data/mongo-cnf-1:/data/db
         ports:
             - "30001:27017"
-        command: mongod --replSet cnf-serv --rest --configsvr --port 27017 --oplogSize 16 --noprealloc --smallfiles
+        command: mongod --replSet cnf-serv --dbpath /data/db --configsvr --port 27017 --oplogSize 16 --noprealloc --smallfiles
         links:
             - mongo-cnf-2:mongo-cnf-2
             - mongo-cnf-3:mongo-cnf-3
@@ -29,7 +35,7 @@ services:
 
     mongo-cnf-setup:
         container_name: "mongo-cnf-setup"
-        image: mongo
+        image: mongo:3.4
         depends_on:
             - "mongo-cnf-1"
             - "mongo-cnf-2"
