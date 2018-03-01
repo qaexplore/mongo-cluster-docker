@@ -6,7 +6,7 @@ services:
         volumes:
             - ./data/mongo-router:/data/db
         ports:
-            - "30031:27017"
+            - "40000:27017"
         depends_on:
             - "mongo-rs1-setup"
             - "mongo-rs2-setup"

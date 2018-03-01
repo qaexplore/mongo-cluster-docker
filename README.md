@@ -1,91 +1,53 @@
-# mongo-cluster-docker
+## Usage
 
-This is a simple 3 node replica mongodb setup based on official `mongo` docker image using `docker-compose` described in my blogpost at https://warzycha.pl/mongo-db-sharding-docker-example/.
+[原README.md](https://github.com/yujintang/mongo-cluster-docker/blob/master/README_old.md)
 
-For details description, steps and discussion go to:
+**本教程用于单机搭建mongodb集群环境、以供开发使用，请勿用于生产环境**
 
-1. https://warzycha.pl/mongo-db-sharding-docker-example/
-2. https://warzycha.pl/mongo-db-shards-by-location/
-
-# Run
-
+### 1. clone
 ```
-docker-compose -f docker-compose.1.yml -f docker-compose.2.yml  -f docker-compose.cnf.yml -f docker-compose.shard.yml up
+git clone git@github.com:yujintang/mongo-cluster-docker.git
+cd mongo-cluster-docker
 ```
 
-# Tests
-> Manually for the time being
-
-0. Core tests
-
-Basic *replica* test on *rs1* replica set (data nodes), `mongo-1-1`
-```js
-rs.status();
+### 2.初始化volume对应文件夹
+```
+./init_dir.sh
 ```
 
-this should return in `members` 3 nodes.
-
-Basic *sharding* test on *router* (mongos), `mongo-router`
-```js
-sh.status();
+### 3.使用docker-compose启用mongodb-cluster
 ```
-
-this should return something similar to:
-
+docker-compose up -d
 ```
---- Sharding Status --- 
-  sharding version: {
-	"_id" : 1,
-	"minCompatibleVersion" : 5,
-	"currentVersion" : 6,
-	"clusterId" : ObjectId("587d306454828b89adaca524")
-}
-  shards:
-  active mongoses:
-	"3.4.1" : 1
-  balancer:
-	Currently enabled:  yes
-	Currently running:  yes
-		Balancer lock taken at Mon Jan 16 2017 22:18:53 GMT+0100 by ConfigServer:Balancer
-	Failed balancer rounds in last 5 attempts:  0
-	Migration Results for the last 24 hours: 
-		No recent migrations
-  databases:
-
+### 4.进入mongo-router并设置某个数据库分片
+#### 4.1 进入docker
 ```
-
-# Sharding configuration
-
-Connect to 'mongos' router and run `queries/shard-status.js` for shard status.
-
-To establish location based partitioning on it just run `queries/init.js`.
-
-# Issues and limitations
-
-It's sometimes stuck on 'mongo-router         | 2017-01-16T21:29:48.573+0000 W NETWORK  [replSetDistLockPinger] No primary detected for
-set cnf-serv'. It's because quite random order in `docker-compose`.
-
-My workaround was just to kill all containers related.
-
+docker-compose exec mongo-router mongo
 ```
-docker-compose -f docker-compose.1.yml -f docker-compose.2.yml  -f docker-compose.cnf.yml -f docker-compose.shard.yml rm -f
+#### 4.2 切换admin
 ```
-
-Please pull request. :)
-
-Basically `mongosetup` service is now splitted to multiple `yml` files. :)
-
-# Reference
-
-* http://www.sohamkamani.com/blog/2016/06/30/docker-mongo-replica-set/
-* https://github.com/singram/mongo-docker-compose
-* http://stackoverflow.com/questions/31138631/configuring-mongodb-replica-set-from-docker-compose
-* https://gist.github.com/garycrawford/0a45f820e146917d231d
-* http://stackoverflow.com/questions/31746182/docker-compose-wait-for-container-x-before-starting-y
-* https://docs.docker.com/compose/startup-order/
-* http://stackoverflow.com/questions/31138631/configuring-mongodb-replica-set-from-docker-compose
-* https://github.com/soldotno/elastic-mongo/blob/master/docker-compose.yml
-
-See more @ `ENV.md`
-
-MIT @ `LICENSE`
+use admin
+```
+#### 4.3 查看分片状态
+```
+sh.status()
+```
+#### 4.4 对test数据库分片
+```
+db.runCommand({ enablesharding: 'test'})
+```
+### 4.关闭docker-cluster
+```
+docker-compose stop
+```
+### 5.移除docker-cluster
+```
+docker-compose rm
+```
+## Port 映射本地端口
+```
+Sharding1: 30011,30012, 30013
+Sharding2: 30021,30022, 30023
+config: 30001, 30002, 30003
+router: 40000
+```

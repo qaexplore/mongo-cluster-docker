@@ -6,7 +6,7 @@ services:
         volumes:
             - ./data/mongo-2-2:/data/db
         ports:
-            - "30042:27017"
+            - "30022:27017"
         command: mongod --replSet rs2 --dbpath /data/db --shardsvr --port 27017 --nojournal --oplogSize 16 --noprealloc --smallfiles
         restart: always
 
@@ -16,7 +16,7 @@ services:
         volumes:
             - ./data/mongo-2-3:/data/db
         ports:
-            - "30043:27017"
+            - "30023:27017"
         command: mongod --replSet rs2 --dbpath /data/db --shardsvr --port 27017 --nojournal --oplogSize 16 --noprealloc --smallfiles
         restart: always 
 
@@ -26,7 +26,7 @@ services:
         volumes:
             - ./data/mongo-2-1:/data/db
         ports:
-            - "30041:27017"
+            - "30021:27017"
         command: mongod --replSet rs2 --dbpath /data/db --shardsvr --port 27017 --nojournal --oplogSize 16 --noprealloc --smallfiles
         links:
             - mongo-2-2:mongo-2-2
